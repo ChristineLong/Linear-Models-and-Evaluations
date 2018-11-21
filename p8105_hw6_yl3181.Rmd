@@ -19,10 +19,11 @@ library(modelr)
 ```{r}
 homi = read_csv("homicide-data.csv") %>% 
   mutate(city_state = str_c(city, state, sep = ", "), 
-         bin_sol = as.numeric(disposition == "Closed by arrest"),
-         bin_race = as.numeric(victim_race == "White")) %>% 
-  filter (!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL")))
+         bin_sol = (disposition == "Closed by arrest"),
+         bin_race = (victim_race == "White")) %>% 
+  filter (!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL"))) %>% 
+  mutate(victim_age = replace(victim_age, victim_age == "Unknown", ""),
+         victim_age = as.numeric(victim_age))
 
-summary(homi)
 ```
 
