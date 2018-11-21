@@ -17,6 +17,7 @@ library(modelr)
 
 
 ```{r}
+# Load data and tidy it
 homi = read_csv("homicide-data.csv") %>% 
   mutate(city_state = str_c(city, state, sep = ", "), 
          bin_sol = (disposition == "Closed by arrest"),
@@ -24,6 +25,5 @@ homi = read_csv("homicide-data.csv") %>%
   filter (!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL"))) %>% 
   mutate(victim_age = replace(victim_age, victim_age == "Unknown", ""),
          victim_age = as.numeric(victim_age))
-
 ```
 
