@@ -27,3 +27,17 @@ homi = read_csv("homicide-data.csv") %>%
          victim_age = as.numeric(victim_age))
 ```
 
+```{r}
+# Fit logistic regression and save it
+sol_fit = homi %>% 
+  filter(city_state == "Baltimore, MD") %>% 
+  glm(bin_sol ~ victim_age + bin_race + victim_sex, data = ., family = binomial())
+
+  
+# Clean results and add estimates and CIs for ORs
+sol_fit %>% 
+  broom::tidy() %>% 
+  
+
+```
+
