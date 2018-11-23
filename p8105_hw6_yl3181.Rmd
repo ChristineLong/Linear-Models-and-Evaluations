@@ -12,6 +12,7 @@ output: github_document
 #Load libraries needed
 library(tidyverse)
 library(modelr)
+library(MASS)
 ```
 
 
@@ -29,15 +30,17 @@ homi = read_csv("homicide-data.csv") %>%
 
 ```{r}
 # Fit logistic regression and save it
-sol_fit = homi %>% 
+sol_fit_Bal = homi %>% 
   filter(city_state == "Baltimore, MD") %>% 
   glm(bin_sol ~ victim_age + bin_race + victim_sex, data = ., family = binomial())
 
   
-# Clean results and add estimates and CIs for ORs
-sol_fit %>% 
+# Clean results and add estimates and CIs for ORs. OR = exp(b1)
+sol_fit_Bal %>% 
   broom::tidy() %>% 
-  
-
+  cbind(exp(confint(sol_fit_Bal))) %>% 
+  mutate(OR = exp(estimate)) %>% 
+  filter(term == "bin_raceTRUE") %>% 
+  knitr::kable()
 ```
 
