@@ -75,3 +75,52 @@ sol_fit %>%
 ```
 
 
+## Problem 2
+
+```{r}
+bw = read_csv("birthweight.csv") %>% 
+  mutate(babysex = as.factor(babysex),
+         frace = as.factor(frace),
+         malform = as.factor(malform),
+         mrace = as.factor(mrace))
+```
+
+
+
+### First Model
+
++ Most values for variable parity, pnumlbw and pnumsga are 0, therefore they won't be included in the following models;
++ Using caret to build penalized regression model (lasso) using all the other main effects;
++ Preprocess the model variables with centering and scaling;
++ Use cross validation to tune parameters;
+
+```{r}
+# Build a model includes all main effects except for parity, pnumlbw and pnumsga with caret
+library(caret)
+
+# Use 5-fold validation and create the training sets
+
+data_train = trainControl(method="cv", number = 5)
+
+# Fit the lasso model with all the other main effects with preprocessing and cv
+bw_lasso = bw %>% 
+  dplyr::select(-parity, -pnumlbw, -pnumsga) %>% 
+  train(bwt ~ ., data = .,
+        trControl = data_train,
+        method = 'lasso',
+        preProc = c("center", "scale"),
+        na.action = na.pass)
+
+bw %>% 
+  add_predictions(bw_lasso) %>% 
+  add_residuals(bw_lasso) %>% 
+  ggplot(aes(x = pred, y = resid)) + geom_point()
+```
+
+
+### Second Model
+
+```{r}
+
+```
+
