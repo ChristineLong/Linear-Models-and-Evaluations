@@ -12,7 +12,7 @@ output: github_document
 #Load libraries needed
 library(tidyverse)
 library(modelr)
-
+library(MASS)
 ```
 
 
@@ -39,19 +39,17 @@ sol_fit_Bal = homi %>%
 
   
 # Clean results and add estimates and CIs for ORs. OR = exp(b1)
-library(MASS)
-
 sol_fit_Bal %>% 
   broom::tidy() %>% 
   cbind(exp(confint(sol_fit_Bal))) %>% 
   mutate(OR = exp(estimate)) %>% 
-  filter(term == "bin_raceTRUE") %>% 
+  filter(term == "bin_racewhite") %>% 
   knitr::kable()
 ```
 
 ```{r}
 # Build logistic regression for every cities, generate adjusted ORs and CIs.
-homi %>%
+sol_fit = homi %>%
   dplyr::select(city_state, bin_sol, victim_age, bin_race, victim_sex) %>% 
   group_by(city_state) %>% 
   nest() %>% 
@@ -62,24 +60,18 @@ homi %>%
   mutate(OR = exp(estimate),
          lwconf = estimate - std.error * 1.96,
          upconf = estimate + std.error * 1.96)
-```
 
-
-
-```{r}
-# Fit model for every city and extract OR and its CI
-sol_fit = homi %>%
-  group_by(city_state) %>% 
-  nest() %>% 
-  mutate(model = purrr::map(.x = .data, .f = ~broom::tidy(glm(bin_sol ~ victim_age + bin_race + victim_sex, data = .x, family = binomial()))))
-
-%>% 
-  broom::tidy() 
-
-  cbind(exp(confint(sol_fit))) %>% 
-  mutate(OR = exp(estimate)) %>% 
-  filter(term == "bin_raceTRUE") %>% 
-  
+sol_fit %>% 
+  ggplot(aes(x = fct_reorder(city_state, OR), y = OR)) + 
+  geom_point() + 
+  geom_errorbar(aes(ymin = lwconf, ymax = upconf)) +
+  labs(
+    title = "Estimated OR of solving homicide in US cities",
+    x = "cities and states",
+    y = "Estimated OR of solving cases"
+  ) + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
 ```
 
 
