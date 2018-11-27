@@ -121,6 +121,20 @@ bw %>%
 ### Second Model
 
 ```{r}
+bw_2plm = lm(bwt ~ blength + gaweeks, data = bw)
+bw_intlm = lm(bwt ~ (bhead + blength + babysex)^3, data = bw)
+
+
+bw %>% 
+  add_predictions(bw_2plm) %>% 
+  add_residuals(bw_2plm) %>% 
+  ggplot(aes(x = pred, y = resid)) + geom_point()
+
+
+bw %>% 
+  add_predictions(bw_lasso) %>% 
+  add_residuals(bw_lasso) %>% 
+  ggplot(aes(x = pred, y = resid)) + geom_point()
 
 ```
 
