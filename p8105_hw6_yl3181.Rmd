@@ -123,13 +123,10 @@ bw %>%
 ```
 
 
-### Second Model
+### Compare lasso with other two models
 
 ```{r}
-bw_slr = lm(bwt ~ blength + gaweeks, data = bw)
-bw_intlm = lm(bwt ~ (bhead + blength + babysex)^3, data = bw)
-
-
+# Build three different models
 cv_data = crossv_mc(bw, 100) %>% 
   mutate(train = map(train, as_tibble),
          test = map(test, as_tibble)) %>% 
@@ -140,6 +137,7 @@ cv_data = crossv_mc(bw, 100) %>%
          rmse_intlm  = map2_dbl(intlm, test, ~rmse(model = .x, data = .y)),
          rmse_lasso  = map2_dbl(lasso, test, ~rmse(model = .x, data = .y)))
 
+# Plot RMSE for different three models 
 cv_data %>% 
   dplyr::select(starts_with("rmse")) %>% 
   gather(key = model, value = rmse) %>% 
