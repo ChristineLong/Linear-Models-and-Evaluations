@@ -26,7 +26,8 @@ homi = read_csv("homicide-data.csv") %>%
          victim_age = as.numeric(victim_age),
          victim_sex = replace(victim_sex, victim_sex == "Unknown", ""),
          victim_race = replace(victim_race, victim_race == "Unknown", ""),
-         bin_race = ifelse(victim_race == "White", "white", ifelse(victim_race == "", "","nonWhite"))) %>% 
+         bin_race = ifelse(victim_race == "White", "white", ifelse(victim_race == "", "","nonwhite")),
+         bin_race = relevel(factor(bin_race), "white")) %>% 
   filter(!(city_state %in% c("Dallas, TX", "Phoenix, AZ", "Kansas City, MO", "Tulsa, AL"))) 
 
 ```
@@ -43,7 +44,7 @@ sol_fit_Bal %>%
   broom::tidy() %>% 
   cbind(exp(confint(sol_fit_Bal))) %>% 
   mutate(OR = exp(estimate)) %>% 
-  filter(term == "bin_racewhite") %>% 
+  filter(term == "bin_racenonwhite") %>% 
   knitr::kable()
 ```
 
@@ -56,7 +57,7 @@ sol_fit = homi %>%
   mutate(model = purrr::map(.x = data, .f = ~broom::tidy(glm(bin_sol ~ ., data = .x, family = binomial())))) %>% 
   .[,-2] %>% 
   unnest() %>% 
-  filter(term == "bin_racewhite") %>% 
+  filter(term == "bin_racenonwhite") %>% 
   mutate(OR = exp(estimate),
          lwconf = estimate - std.error * 1.96,
          upconf = estimate + std.error * 1.96)
