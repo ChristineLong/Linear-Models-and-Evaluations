@@ -59,8 +59,8 @@ sol_fit = homi %>%
   unnest() %>% 
   filter(term == "bin_racenonwhite") %>% 
   mutate(OR = exp(estimate),
-         lwconf = estimate - std.error * 1.96,
-         upconf = estimate + std.error * 1.96)
+         lwconf = exp(estimate - std.error * 1.96),
+         upconf = exp(estimate + std.error * 1.96))
 
 sol_fit %>% 
   ggplot(aes(x = fct_reorder(city_state, OR), y = OR)) + 
@@ -120,7 +120,12 @@ return(newdf)
 bw %>% 
   add_predictions(lasso_fun(bw)) %>% 
   add_residuals(lasso_fun(bw)) %>% 
-  ggplot(aes(x = pred, y = resid)) + geom_point()
+  ggplot(aes(x = pred, y = resid)) + geom_point() +
+  labs(
+    title = "Prediction vs. Residues",
+    x = "Predictions",
+    y = "Residues"
+  )
 ```
 
 
@@ -144,6 +149,11 @@ cv_data %>%
   gather(key = model, value = rmse) %>% 
   mutate(model = str_replace(model, "rmse_", ""),
          model = fct_inorder(model)) %>% 
-  ggplot(aes(x = model, y = rmse)) + geom_violin()
+  ggplot(aes(x = model, y = rmse)) + geom_violin() +
+  labs(
+    title = "RMSE for different models",
+    x = "Models",
+    y = "RMSE"
+  )
 ```
 
