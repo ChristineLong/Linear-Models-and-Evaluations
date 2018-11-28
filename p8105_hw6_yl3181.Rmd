@@ -118,7 +118,7 @@ return(newdf)
 #Apply the function to birthweight data and draw a plot on residuals against fitted values  
 bw %>% 
   add_predictions(lasso_fun(bw)) %>% 
-  add_residuals(bw_lasso) %>% 
+  add_residuals(lasso_fun(bw)) %>% 
   ggplot(aes(x = pred, y = resid)) + geom_point()
 ```
 
