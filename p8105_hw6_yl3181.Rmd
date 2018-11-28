@@ -101,7 +101,7 @@ library(caret)
 
 # Use 5-fold validation and create the training sets
 
-data_train = trainControl(method="cv", number = 5)
+data_train = trainControl(method = "cv", number = 5)
 
 # Write a function for the lasso model with all the other main effects with preprocessing and cv
 lasso_fun = function(df){
