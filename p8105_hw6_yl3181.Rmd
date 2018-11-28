@@ -102,17 +102,22 @@ library(caret)
 
 data_train = trainControl(method="cv", number = 5)
 
-# Fit the lasso model with all the other main effects with preprocessing and cv
-bw_lasso = bw %>% 
+# Write a function for the lasso model with all the other main effects with preprocessing and cv
+lasso_fun = function(df){
+  
+newdf = df %>% 
   dplyr::select(-parity, -pnumlbw, -pnumsga) %>% 
   train(bwt ~ ., data = .,
         trControl = data_train,
         method = 'lasso',
         preProc = c("center", "scale"),
         na.action = na.pass)
+return(newdf)
+  }
 
+#Apply the function to birthweight data and draw a plot on residuals against fitted values  
 bw %>% 
-  add_predictions(bw_lasso) %>% 
+  add_predictions(lasso_fun(bw)) %>% 
   add_residuals(bw_lasso) %>% 
   ggplot(aes(x = pred, y = resid)) + geom_point()
 ```
@@ -121,20 +126,25 @@ bw %>%
 ### Second Model
 
 ```{r}
-bw_2plm = lm(bwt ~ blength + gaweeks, data = bw)
+bw_slr = lm(bwt ~ blength + gaweeks, data = bw)
 bw_intlm = lm(bwt ~ (bhead + blength + babysex)^3, data = bw)
 
 
-bw %>% 
-  add_predictions(bw_2plm) %>% 
-  add_residuals(bw_2plm) %>% 
-  ggplot(aes(x = pred, y = resid)) + geom_point()
+cv_data = crossv_mc(bw, 100) %>% 
+  mutate(train = map(train, as_tibble),
+         test = map(test, as_tibble)) %>% 
+  mutate(slr   = map(train, ~lm(bwt ~ blength + gaweeks, data = .x)),
+         intlm = map(train, ~lm(bwt ~ (bhead + blength + babysex)^3, data = .x)),
+         lasso = map(train, ~lasso_fun(.x))) %>% 
+  mutate(rmse_slr    = map2_dbl(slr, test, ~rmse(model = .x, data = .y)),
+         rmse_intlm  = map2_dbl(intlm, test, ~rmse(model = .x, data = .y)),
+         rmse_lasso  = map2_dbl(lasso, test, ~rmse(model = .x, data = .y)))
 
-
-bw %>% 
-  add_predictions(bw_lasso) %>% 
-  add_residuals(bw_lasso) %>% 
-  ggplot(aes(x = pred, y = resid)) + geom_point()
-
+cv_data %>% 
+  dplyr::select(starts_with("rmse")) %>% 
+  gather(key = model, value = rmse) %>% 
+  mutate(model = str_replace(model, "rmse_", ""),
+         model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + geom_violin()
 ```
 
