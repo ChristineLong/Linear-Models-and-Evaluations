@@ -1,5 +1,5 @@
 ---
-title: "p8105_hw6_yl3181"
+title: "Difference models and evaluations"
 author: "Yuelin Long"
 date: "November 20, 2018"
 output: github_document
